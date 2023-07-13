@@ -29,10 +29,8 @@ Input: nums = [0,0,0]
 Output: [[0,0,0]]
 Explanation: The only possible triplet sums up to 0.
 ```
-```math
-\left( \sum_{k=1}^n a_k b_k \right)^2 \leq \left( \sum_{k=1}^n a_k^2 \right) \left( \sum_{k=1}^n b_k^2 \right)
-```
+
 **Constraints:**
 
 * `3 <= nums.length <= 3000`
-* `$$-10^5$$ <= nums[i] <= $$10^5$$`
+* `-10^5 <= nums[i] <= 10^5`
