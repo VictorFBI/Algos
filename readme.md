@@ -1,2 +1,17 @@
-# Репозиторий с решёнными задачами по С++
-Каждая задача лежит в отдельной ветке. Условия к задачам лежат в файлах `readme.md`. Коды решения написаны в файлах `main.cpp`
+# Generate Parentheses
+Given `n` pairs of parentheses, write a function to *generate all combinations of well-formed parentheses.*
+
+**Example 1:**
+
+  **Input:** n = 3
+  **Output:** ["((()))","(()())","(())()","()(())","()()()"]
+
+**Example 2:**
+
+  **Input:** n = 1
+  **Output:** ["()"]
+ 
+
+**Constraints:**
+
+* `1 <= n <= 8`
