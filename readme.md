@@ -1,2 +1,2 @@
 # Вращение массива с максимальным отличием
-![image](https://github.com/VictorFBI/Algos/assets/124510561/ba39c3b4-9904-4cab-b0e9-a289da6da197)
+![image](https://github.com/VictorFBI/Algos/assets/124510561/935d3c83-3dfe-4f0e-84f9-a00676b7efda)
