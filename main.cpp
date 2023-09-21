@@ -2,7 +2,7 @@
 #include <string>
 #include <stack>
 
-std::string unpack(std::string& str) {
+std::string decode(std::string& str) {
   std::string ans;
   std::stack<int> digits;
   std::stack<std::string> records;
@@ -22,8 +22,8 @@ std::string unpack(std::string& str) {
 
   while(digits.size() != 1) {
     auto size = digits.top();
-    auto record = records.top();
-    for(auto i = 0; i < size - 1; ++i) record += records.top();
+    std::string record;
+    for(auto i = 0; i < size; ++i) record += records.top();
     digits.pop();
     records.pop();
     records.top() += record;
@@ -37,7 +37,7 @@ std::string unpack(std::string& str) {
 
 
 int main() {
-  std::string str = "1[a2[bbb3[c]]]";
-  std::cout << unpack(str);
+  std::string str = "1[a2[bbb0[c]]]";
+  std::cout << decode(str);
   return 0;
 }
