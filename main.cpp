@@ -1,201 +1,195 @@
 #include <iostream>
 #include <vector>
-#include <unordered_map>
+#include <unordered_set>
 
 struct Node {
-  Node(int _val, Node *_prev, Node *_next) : val(_val), prev(_prev), next(_next) {
+  Node() = default;
+  explicit Node(int value) : next(nullptr), previous(nullptr), data(value) {
   }
-  int val;
-  Node *prev;
   Node *next;
+  Node *previous;
+  int data;
 };
 
 class DoublyLinkedList {
  public:
-  DoublyLinkedList() : size(0), head(nullptr), tail(nullptr) {
+  Node *head;
+  Node *tail;
+  DoublyLinkedList() : head(nullptr), tail(nullptr) {
   }
   DoublyLinkedList(const DoublyLinkedList &other) : DoublyLinkedList() {
     auto iter = other.head;
     while (iter != nullptr) {
-      pushBack(iter->val);
-      iter = iter->prev;
+      pushBack(iter->data);
+      iter = iter->next;
     }
   }
-  explicit DoublyLinkedList(std::vector<int>& vec) : DoublyLinkedList() {
-    for (auto& el : vec) {
+  explicit DoublyLinkedList(std::vector<int> &vec) : DoublyLinkedList() {
+    for (auto &el : vec) {
       pushBack(el);
     }
   }
+  ~DoublyLinkedList() {
+    erase();
+  }
   void pushBack(int el) {
-    if (size == 0) {
-      head = new Node(el, nullptr, nullptr);
+    auto tmp = new Node(el);
+    if (head == nullptr) {
+      head = tmp;
       tail = head;
     } else {
-      tail->prev = new Node(el, nullptr, tail);
-      tail = tail->prev;
+      tmp->previous = tail;
+      tail->next = tmp;
+      tail = tmp;
     }
-    ++size;
   }
   void pushFront(int el) {
-    if (size == 0) {
-      head = new Node(el, nullptr, nullptr);
+    auto tmp = new Node(el);
+    if (head == nullptr) {
+      head = tmp;
       tail = head;
     } else {
-      head->next = new Node(el, head, nullptr);
-      head = head->next;
+      tmp->next = head;
+      head->previous = tmp;
+      head = tmp;
     }
-    ++size;
   }
   void insert(Node *prev, int data) {
-    if (prev == nullptr || !contains(prev)) {
-      throw std::runtime_error("Wrong position for insertion!");
-    }
-    if (prev->next == nullptr) {
-      pushFront(data);
+    if (prev == nullptr) throw std::runtime_error("Wrong position for insertion!");
+    if (prev == tail) {
+      pushBack(data);
       return;
     }
-    auto to_insert = new Node(data, prev, prev->next);
-    prev->next = to_insert;
-    prev->next->prev = to_insert;
-    ++size;
+    auto tmp = head;
+    bool isBreak = false;
+    while (tmp != nullptr) {
+      if (prev == tmp) {
+        auto to_insert = new Node(data);
+        to_insert->previous = tmp;
+        to_insert->next = tmp->next;
+        tmp->next->previous = to_insert;
+        tmp->next = to_insert;
+        isBreak = true;
+        break;
+      }
+      tmp = tmp->next;
+    }
+
+    if (!isBreak) throw std::runtime_error("Wrong position for insertion!");
   }
   void popFront() {
-    if (size == 0) {
+    if (head == nullptr) {
       throw std::runtime_error("Deletion error!");
     }
-    head = head->prev;
-    delete head->next;
-    head->next = nullptr;
-    --size;
-  }
-  void popBack() {
-    if (size == 0) {
-      throw std::runtime_error("Deletion error!");
-    }
-    tail = tail->next;
-    delete tail->prev;
-    tail->prev = nullptr;
-    --size;
-  }
-  void pop(Node *pos) {
-    if (pos == nullptr || !contains(pos)) {
-      throw std::runtime_error("Wrong position for deletion!");
-    }
-    if (pos->next == nullptr) {
-      popFront();
+    if (head == tail) {
+      delete head;
+      head = nullptr;
+      tail = nullptr;
       return;
     }
-    if (pos->prev == nullptr) {
+    head = head->next;
+    delete head->previous;
+    head->previous = nullptr;
+  }
+  void popBack() {
+    if (head == nullptr) {
+      throw std::runtime_error("Deletion error!");
+    }
+    if (head == tail) {
+      delete tail;
+      head = nullptr;
+      tail = nullptr;
+      return;
+    }
+    tail = tail->previous;
+    delete tail->next;
+    tail->next = nullptr;
+  }
+  void pop(Node *pos) {
+    if (pos == nullptr || head == nullptr) throw std::runtime_error("Wrong position for deletion!");
+    if (pos == tail) {
       popBack();
       return;
     }
-
-    pos->next->prev = pos->prev;
-    pos->prev->next = pos->next;
-    delete pos;
-    --size;
+    if (pos == head) {
+      popFront();
+      return;
+    }
+    auto tmp = head;
+    bool isBreak = false;
+    while (tmp != nullptr) {
+      if (pos == tmp) {
+        pos->previous->next = pos->next;
+        pos->next->previous = pos->previous;
+        delete pos;
+        isBreak = true;
+        break;
+      }
+      tmp = tmp->next;
+    }
+    if (!isBreak) throw std::runtime_error("Wrong position for deletion!");
   }
   void erase() {
-    if (size == 0) return;
-    while (size != 1) {
+    if (head == nullptr) return;
+    while (head != tail) {
       popBack();
     }
     delete head;
     head = nullptr;
     tail = nullptr;
-    size = 0;
   }
   void reverse() {
-    auto forward = head;
-    auto back = tail;
-    for (auto i = 1; i <= size / 2; ++i) {
-      std::swap(forward->val, back->val);
-      forward = forward->prev;
-      back = back->next;
+    auto tmp = head;
+    auto oldHead = head;
+    while (tmp != nullptr) {
+      auto previous = tmp->previous;
+      auto next = tmp->next;
+      tmp->previous = next;
+      tmp->next = previous;
+      tmp = next;
     }
+    head = tail;
+    tail = oldHead;
   }
   void removeDuplicates() {
-    std::unordered_map<int, int> map;
+    std::unordered_set<int> set;
     auto iter = head;
-    auto tmp = new DoublyLinkedList();
     while (iter != nullptr) {
-      if (map.count(iter->val) == 0) {
-        tmp->pushBack(iter->val);
-        map[iter->val] = 1;
+      if (set.count(iter->data) == 0) {
+        set.insert(iter->data);
+      } else {
+        auto tmp = iter;
+
+        pop(tmp);
       }
-      iter = iter->prev;
+      iter = iter->next;
     }
-    erase();
-    head = tmp->head;
-    tail = tmp->tail;
-    size = tmp->size;
   }
-  void replace(int el, int new_el) {
+  void replace(int oldElem, int newElem) const {
     auto iter = head;
     while (iter != nullptr) {
-      if (iter->val == el) iter->val = new_el;
-      iter = iter->prev;
+      if (iter->data == oldElem) iter->data = newElem;
+      iter = iter->next;
     }
   }
 
-  // delete this method in the final answer
-  void print() {
+  void print() const {
     auto iter = head;
     while (iter != nullptr) {
-      std::cout << iter->val << " ";
-      iter = iter->prev;
+      std::cout << iter->data << " ";
+      iter = iter->next;
     }
     std::cout << "\n";
-  }
-
- private:
-  std::size_t size;
-  Node *head;
-  Node *tail;
-  bool contains(Node *pos) {
-    auto iter = head;
-    while (iter != nullptr) {
-      if (iter == pos) return true;
-      iter = iter->prev;
-    }
-    return false;
   }
 };
 
 int main() {
-  std::vector<int> vec{1, 2, 3, 4, 5};
-  auto list = DoublyLinkedList(vec);
-  list.print();
-  list.popBack();
-  list.print();
-  list.popFront();
-  list.print();
-  list.pushBack(3);
-  list.pushBack(5);
-  list.pushBack(3);
-  list.pushBack(4);
-  list.pushBack(5);
-  list.print();
-  list.removeDuplicates();
-  list.print();
-  list.reverse();
-  list.print();
-  list.pushBack(1);
-  list.reverse();
-  list.print();
-  list.erase();
-  list.print();
-  list.pushBack(1);
-  list.pushFront(7);
-  list.print();
-  list.reverse();
-  list.print();
-  list.pushFront(7);
-  list.print();
-  list.removeDuplicates();
-  list.print();
-  list.pushBack(3);
-  list.reverse();
-  list.print();
+  DoublyLinkedList l;
+  l.pushBack(1);
+  l.pushBack(2);
+  l.pushBack(3);
+  l.print();
+  l.insert(l.head->next, 5);
+  l.print();
   return 0;
 }
