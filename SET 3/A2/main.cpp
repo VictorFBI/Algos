@@ -61,6 +61,7 @@ void test_sort(sort_type value) {
 }
 
 int main() {
+  test_sort(merge);
 
   fout_abs.close();
   fout_rev.close();
